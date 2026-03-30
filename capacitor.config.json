@@ -1,0 +1,24 @@
+{
+  "appId": "mingo.app.com",
+  "appName": "Mingo",
+  "webDir": "dist",
+  "server": {
+    "url": "http://mingo.culturavpn.pro:4000",
+    "cleartext": true,
+    "allowNavigation": ["mingo.culturavpn.pro"]
+  },
+  "plugins": {
+    "Geolocation": {
+      "requestPermission": true
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#8A2BE2"
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
