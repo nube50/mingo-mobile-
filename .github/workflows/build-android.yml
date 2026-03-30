@@ -9,28 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
-    container:
-      image: ubuntu:22.04
-      
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update && apt-get install -y openjdk-17-jdk wget unzip curl git
-          
-      - name: Setup Android SDK
-        run: |
-          mkdir -p /opt/android-sdk/cmdline-tools
-          cd /opt/android-sdk/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-          unzip -q tools.zip
-          mv cmdline-tools latest
-          rm tools.zip
-          yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-          /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-        env:
-          ANDROID_HOME: /opt/android-sdk
-          ANDROID_SDK_ROOT: /opt/android-sdk
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -45,16 +24,23 @@ jobs:
       - name: Build web
         run: npm run build
 
-      - name: Copy web to Android
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Run Capacitor Sync
+        run: npx cap sync android
+
+      - name: Build APK
         run: |
-          mkdir -p android/app/src/main/assets/public
-          cp -r dist/* android/app/src/main/assets/public/
-          cp capacitor.config.json android/app/src/main/assets/
-          cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
-        env:
-          ANDROID_HOME: /opt/android-sdk
-          ANDROID_SDK_ROOT: /opt/android-sdk
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
