@@ -47,29 +47,26 @@ jobs:
           
           for i in 1 2 3 4 5; do
             echo "=== Build attempt $i ==="
-            if ./gradlew clean assembleDebug --no-daemon; then
+            if ./gradlew clean assembleDebug --no-daemon 2>&1 | tee gradle.log; then
               echo "Build successful!"
-              exit 0
+              cat gradle.log | tail -50
+              break
             else
               echo "Attempt $i failed..."
+              cat gradle.log | tail -50
               sleep 10
             fi
           done
-          exit 1
 
-      - name: Debug - List build outputs
+      - name: Debug outputs
         run: |
-          echo "=== Checking outputs ==="
-          ls -la android/app/build/outputs/
-          echo "=== Checking APK folder ==="
-          ls -la android/app/build/outputs/apk/
-          echo "=== Checking debug folder ==="
-          ls -la android/app/build/outputs/apk/debug/ || echo "No debug folder"
-          echo "=== Find APK ==="
-          find android -name "*.apk"
+          echo "=== Outputs ==="
+          ls -la android/app/build/outputs/ || echo "No outputs dir"
+          ls -la android/app/build/outputs/apk/ || echo "No apk dir"  
+          ls -la android/app/build/outputs/apk/debug/ || echo "No debug dir"
+          find android -name "*.apk" || echo "No APK found"
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
