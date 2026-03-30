@@ -45,19 +45,26 @@ jobs:
           cd android
           chmod +x gradlew
           
-          # Try up to 3 times
-          for i in 1 2 3; do
+          for i in 1 2 3 4 5; do
             echo "=== Build attempt $i ==="
             if ./gradlew clean assembleDebug --no-daemon 2>&1; then
               echo "Build succeeded!"
               break
             else
-              echo "Build attempt $i failed, retrying in 10 seconds..."
+              echo "Build attempt $i failed, retrying..."
               sleep 10
             fi
           done
 
-      - name: Verify and upload APK
+      - name: Find APK files
+        id: find_apk
+        run: |
+          APK_PATH=$(find . -name "*.apk" -type f | head -1)
+          echo "APK found: $APK_PATH"
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          ls -la android/app/build/outputs/apk/debug/ || echo "No APK folder"
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
