@@ -40,29 +40,16 @@ jobs:
         run: npx cap sync android
 
       - name: Build APK
-        id: build
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon 2>&1 | tee ../gradle.log
-          echo "EXIT_CODE=$?" >> $GITHUB_OUTPUT
-        
-      - name: Print Gradle log on failure
-        if: failure()
-        run: cat gradle.log
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Upload Gradle log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-log
-          path: gradle.log
-
-      - name: Verify APK exists
-        run: ls -la android/app/build/outputs/apk/debug/ || echo "No APK directory"
+      - name: List build outputs
+        run: find android/app/build -name "*.apk" 2>/dev/null
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/
