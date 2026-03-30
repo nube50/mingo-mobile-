@@ -33,16 +33,33 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Run Capacitor Sync
+      - name: Install Capacitor CLI
+        run: npm install -D @capacitor/cli
+
+      - name: Sync Capacitor
         run: npx cap sync android
 
       - name: Build APK
+        id: build
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee ../gradle.log
+          echo "EXIT_CODE=$?" >> $GITHUB_OUTPUT
+        
+      - name: Print Gradle log on failure
+        if: failure()
+        run: cat gradle.log
+
+      - name: Upload Gradle log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-log
+          path: gradle.log
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
