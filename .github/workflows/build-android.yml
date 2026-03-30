@@ -30,6 +30,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+          architecture: x64
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -44,38 +45,10 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          
-          # Intentar múltiples veces con log completo
-          for i in 1 2 3; do
-            echo "========== Build attempt $i ==========" 
-            if ./gradlew clean assembleDebug --no-daemon --info 2>&1 | tee ../full-gradle.log; then
-              echo "========== Build attempt $i SUCCEEDED =========="
-              break
-            else
-              echo "========== Build attempt $i FAILED =========="
-              sleep 10
-            fi
-          done
+          ./gradlew clean assembleDebug --no-daemon
 
-      - name: Show result
-        run: |
-          echo "=== Full Gradle Log (last 200 lines) ==="
-          tail -200 full-gradle.log
-          
-          echo "=== Checking for APK ==="
-          find android -name "*.apk" -type f || echo "NO APK FOUND"
-          ls -la android/app/build/outputs/ || echo "No outputs"
-          ls -la android/app/build/outputs/apk/ || echo "No apk"
-          ls -la android/app/build/outputs/apk/debug/ || echo "No debug"
-
-      - name: Upload full log
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: full-gradle-log
-          path: full-gradle.log
-
-      - name: Upload all outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-outputs
-          path: android/app/build/
+          name: mingo-debug.apk
+          path: android/app/build/outputs/apk/debug/
