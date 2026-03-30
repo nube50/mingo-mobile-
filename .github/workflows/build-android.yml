@@ -56,14 +56,22 @@ jobs:
             fi
           done
 
-      - name: List output files
+      - name: Find and copy APK
         run: |
-          echo "=== Checking for APK ==="
-          find . -name "*.apk" -type f 2>/dev/null
-          ls -la android/app/build/outputs/ 2>/dev/null || echo "No outputs dir"
+          APK_DIR="android/app/build/outputs/apk/debug"
+          if [ -d "$APK_DIR" ]; then
+            echo "APK directory exists"
+            ls -la "$APK_DIR"
+            cp "$APK_DIR"/*.apk . 2>/dev/null || echo "No APK files to copy"
+            ls -la *.apk 2>/dev/null || echo "No APK files found"
+          else
+            echo "APK directory doesn't exist"
+            find android -name "*.apk" -type f
+          fi
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: android/app/build/outputs/apk/debug/
+          path: .
+          if-no-files-found: error
