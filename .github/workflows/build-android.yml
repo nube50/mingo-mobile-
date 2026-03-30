@@ -39,6 +39,9 @@ jobs:
           cp -r dist/* android/app/src/main/assets/public/
           cp capacitor.config.json android/app/src/main/assets/
 
+      - name: Update Capacitor Android
+        run: npx @capacitor/cli@latest sync android --verbose
+
       - name: Build APK
         run: |
           cd android
