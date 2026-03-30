@@ -17,12 +17,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: mobile_app/package-lock.json
 
       - name: Install npm dependencies
         run: |
-          cd mobile_app
           npm install
 
       - name: Setup Java
@@ -36,7 +33,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd mobile_app/android
+          cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
@@ -44,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: mobile_app/android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
