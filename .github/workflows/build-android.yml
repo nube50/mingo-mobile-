@@ -43,22 +43,14 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleDebug --no-daemon 2>&1 | tee gradle.log
-          echo "Exit code: $?"
+          ./gradlew clean assembleDebug --no-daemon
 
-      - name: Show gradle log
-        if: failure()
-        run: cat gradle.log
-
-      - name: Upload gradle log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-log
-          path: gradle.log
+      - name: List files
+        run: |
+          echo "=== Checking for APK ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
