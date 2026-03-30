@@ -36,8 +36,7 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - name: Sync Capacitor Android
-        run: |
-          echo "y" | npx cap sync android
+        run: npx --yes @capacitor/cli sync android
 
       - name: Build APK
         run: |
