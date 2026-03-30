@@ -57,10 +57,13 @@ jobs:
             fi
           done
           
-          # Siempre verificar si existe el APK
-          echo "=== Verificando APK ==="
-          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No existe directorio"
-          find . -name "*.apk" -type f 2>/dev/null || echo "No se encontraron APKs"
+      - name: Show Gradle log
+        run: |
+          echo "=== Fin del log de Gradle (últimas 100 líneas) ==="
+          tail -100 gradle.log
+          echo "=== Buscando APK ==="
+          find . -name "*.apk" -type f
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No existe directorio debug"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
