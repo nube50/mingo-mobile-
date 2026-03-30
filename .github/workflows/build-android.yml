@@ -45,27 +45,31 @@ jobs:
           cd android
           chmod +x gradlew
           
-          # Intentar múltiples veces
           for i in 1 2 3 4 5; do
-            echo "=== Intento de build $i ==="
-            if ./gradlew clean assembleDebug --no-daemon 2>&1 | tee ../gradle.log; then
-              echo "Build exitoso!"
-              break
+            echo "=== Build attempt $i ==="
+            if ./gradlew clean assembleDebug --no-daemon; then
+              echo "Build successful!"
+              exit 0
             else
-              echo "Intento $i falló..."
+              echo "Attempt $i failed..."
               sleep 10
             fi
           done
-          
-      - name: Show Gradle log
+          exit 1
+
+      - name: Debug - List build outputs
         run: |
-          echo "=== Fin del log de Gradle (últimas 100 líneas) ==="
-          tail -100 gradle.log
-          echo "=== Buscando APK ==="
-          find . -name "*.apk" -type f
-          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No existe directorio debug"
+          echo "=== Checking outputs ==="
+          ls -la android/app/build/outputs/
+          echo "=== Checking APK folder ==="
+          ls -la android/app/build/outputs/apk/
+          echo "=== Checking debug folder ==="
+          ls -la android/app/build/outputs/apk/debug/ || echo "No debug folder"
+          echo "=== Find APK ==="
+          find android -name "*.apk"
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
