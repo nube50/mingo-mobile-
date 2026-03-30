@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     steps:
       - name: Checkout code
@@ -43,16 +44,20 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleDebug --no-daemon || ./gradlew assembleDebug --no-daemon
+          
+          # Try up to 3 times
+          for i in 1 2 3; do
+            echo "=== Build attempt $i ==="
+            if ./gradlew clean assembleDebug --no-daemon 2>&1; then
+              echo "Build succeeded!"
+              break
+            else
+              echo "Build attempt $i failed, retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
 
-      - name: Find APK
-        run: |
-          echo "=== APK Files ===" 
-          find android -name "*.apk" -type f
-          echo "=== Debug folder ==="
-          ls -la android/app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug dir"
-
-      - name: Upload APK
+      - name: Verify and upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
