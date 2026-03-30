@@ -34,7 +34,11 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - name: Sync Capacitor
-        run: npx capacitor sync android
+        run: |
+          npx capacitor@latest sync android
+
+      - name: Verify Android build files
+        run: ls -la android/app/src/main/assets/
 
       - name: Build APK
         run: |
