@@ -56,20 +56,14 @@ jobs:
             fi
           done
 
-      - name: Create directory for upload
+      - name: List output files
         run: |
-          mkdir -p upload-apk
-          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk upload-apk/
-            ls -la upload-apk/
-          else
-            echo "APK file not found"
-            ls -la android/app/build/outputs/apk/debug/ 2>/dev/null || echo "Debug folder doesn't exist"
-            find android -name "*.apk" 2>/dev/null || echo "No APK files found"
-          fi
+          echo "=== Checking for APK ==="
+          find . -name "*.apk" -type f 2>/dev/null
+          ls -la android/app/build/outputs/ 2>/dev/null || echo "No outputs dir"
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: mingo-debug.apk
-          path: upload-apk/
+          path: android/app/build/outputs/apk/debug/
