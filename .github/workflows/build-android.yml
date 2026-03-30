@@ -30,7 +30,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          architecture: x64
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -46,11 +45,13 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew clean assembleDebug --no-daemon 2>&1 | tee gradle.log
-          echo "Exit code: $?"
 
-      - name: Show log
-        if: failure()
-        run: tail -50 gradle.log
+      - name: Check build result
+        run: |
+          tail -30 gradle.log
+          echo "=== Looking for APK ==="
+          find android -name "*.apk" -type f
+          ls -la android/app/build/outputs/apk/debug/ || echo "No APK folder"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
