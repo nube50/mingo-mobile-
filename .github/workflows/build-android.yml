@@ -44,16 +44,20 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleDebug --no-daemon 2>&1 || true
-          
-      - name: Find APK
+          ./gradlew clean assembleDebug --no-daemon || true
+
+      - name: Create output directory
         run: |
-          echo "=== Checking for APK ==="
-          find android -name "*.apk" -type f || echo "NO APK FOUND"
-          ls -la android/app/build/outputs/apk/debug/ || echo "No debug folder"
+          mkdir -p $GITHUB_WORKSPACE/output
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk $GITHUB_WORKSPACE/output/
+          else
+            echo "APK not found in default location"
+            find android -name "*.apk" -type f || echo "No APK files found"
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: android/app/build/outputs/apk/debug/
+          path: output/
