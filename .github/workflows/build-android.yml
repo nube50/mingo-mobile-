@@ -45,29 +45,37 @@ jobs:
           cd android
           chmod +x gradlew
           
-          for i in 1 2 3 4 5; do
-            echo "=== Build attempt $i ==="
-            if ./gradlew clean assembleDebug --no-daemon 2>&1 | tee gradle.log; then
-              echo "Build successful!"
-              cat gradle.log | tail -50
+          # Intentar múltiples veces con log completo
+          for i in 1 2 3; do
+            echo "========== Build attempt $i ==========" 
+            if ./gradlew clean assembleDebug --no-daemon --info 2>&1 | tee ../full-gradle.log; then
+              echo "========== Build attempt $i SUCCEEDED =========="
               break
             else
-              echo "Attempt $i failed..."
-              cat gradle.log | tail -50
+              echo "========== Build attempt $i FAILED =========="
               sleep 10
             fi
           done
 
-      - name: Debug outputs
+      - name: Show result
         run: |
-          echo "=== Outputs ==="
-          ls -la android/app/build/outputs/ || echo "No outputs dir"
-          ls -la android/app/build/outputs/apk/ || echo "No apk dir"  
-          ls -la android/app/build/outputs/apk/debug/ || echo "No debug dir"
-          find android -name "*.apk" || echo "No APK found"
+          echo "=== Full Gradle Log (last 200 lines) ==="
+          tail -200 full-gradle.log
+          
+          echo "=== Checking for APK ==="
+          find android -name "*.apk" -type f || echo "NO APK FOUND"
+          ls -la android/app/build/outputs/ || echo "No outputs"
+          ls -la android/app/build/outputs/apk/ || echo "No apk"
+          ls -la android/app/build/outputs/apk/debug/ || echo "No debug"
 
-      - name: Upload APK
+      - name: Upload full log
         uses: actions/upload-artifact@v4
         with:
-          name: mingo-debug.apk
-          path: android/app/build/outputs/apk/debug/
+          name: full-gradle-log
+          path: full-gradle.log
+
+      - name: Upload all outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-outputs
+          path: android/app/build/
