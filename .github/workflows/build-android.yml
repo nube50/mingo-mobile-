@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     
     steps:
       - name: Checkout code
@@ -42,8 +40,13 @@ jobs:
         run: npx cap sync android
 
       - name: Build APK
-        uses: reactivecircus/android-build-action@v0.4.1
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          project-directory: android
-          build-type: debug
-          artifact-name: mingo-debug
+          name: mingo-debug.apk
+          path: android/app/build/outputs/apk/debug/
