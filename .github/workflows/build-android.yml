@@ -45,18 +45,10 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --info > ../gradle_output.txt 2>&1 || true
-        continue-on-error: true
-
-      - name: Upload Gradle output
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-output
-          path: gradle_output.txt
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
-        if: success() || failure()
         with:
           name: mingo-debug.apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
