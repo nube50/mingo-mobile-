@@ -45,33 +45,25 @@ jobs:
           cd android
           chmod +x gradlew
           
+          # Intentar múltiples veces
           for i in 1 2 3 4 5; do
-            echo "=== Build attempt $i ==="
-            if ./gradlew clean assembleDebug --no-daemon 2>&1; then
-              echo "Build succeeded!"
+            echo "=== Intento de build $i ==="
+            if ./gradlew clean assembleDebug --no-daemon 2>&1 | tee ../gradle.log; then
+              echo "Build exitoso!"
               break
             else
-              echo "Build attempt $i failed..."
+              echo "Intento $i falló..."
               sleep 10
             fi
           done
-
-      - name: Find and copy APK
-        run: |
-          APK_DIR="android/app/build/outputs/apk/debug"
-          if [ -d "$APK_DIR" ]; then
-            echo "APK directory exists"
-            ls -la "$APK_DIR"
-            cp "$APK_DIR"/*.apk . 2>/dev/null || echo "No APK files to copy"
-            ls -la *.apk 2>/dev/null || echo "No APK files found"
-          else
-            echo "APK directory doesn't exist"
-            find android -name "*.apk" -type f
-          fi
+          
+          # Siempre verificar si existe el APK
+          echo "=== Verificando APK ==="
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No existe directorio"
+          find . -name "*.apk" -type f 2>/dev/null || echo "No se encontraron APKs"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: .
-          if-no-files-found: error
+          path: android/app/build/outputs/apk/debug/
