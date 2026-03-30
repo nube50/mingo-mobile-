@@ -19,7 +19,9 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install @capacitor/cli
 
       - name: Build web
         run: npm run build
@@ -33,14 +35,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Copy web build to Android
-        run: |
-          mkdir -p android/app/src/main/assets/public
-          cp -r dist/* android/app/src/main/assets/public/
-          cp capacitor.config.json android/app/src/main/assets/
-
-      - name: Update Capacitor Android
-        run: npx @capacitor/cli@latest sync android --verbose
+      - name: Sync Capacitor Android
+        run: npx cap sync android
 
       - name: Build APK
         run: |
