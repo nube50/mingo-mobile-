@@ -33,9 +33,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Prepare Android
-        run: npx capacitor android
-
       - name: Copy web build to Android
         run: |
           mkdir -p android/app/src/main/assets/public
