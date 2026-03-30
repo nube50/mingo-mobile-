@@ -51,21 +51,25 @@ jobs:
               echo "Build succeeded!"
               break
             else
-              echo "Build attempt $i failed, retrying..."
+              echo "Build attempt $i failed..."
               sleep 10
             fi
           done
 
-      - name: Find APK files
-        id: find_apk
+      - name: Create directory for upload
         run: |
-          APK_PATH=$(find . -name "*.apk" -type f | head -1)
-          echo "APK found: $APK_PATH"
-          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
-          ls -la android/app/build/outputs/apk/debug/ || echo "No APK folder"
+          mkdir -p upload-apk
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk upload-apk/
+            ls -la upload-apk/
+          else
+            echo "APK file not found"
+            ls -la android/app/build/outputs/apk/debug/ 2>/dev/null || echo "Debug folder doesn't exist"
+            find android -name "*.apk" 2>/dev/null || echo "No APK files found"
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: mingo-debug.apk
-          path: android/app/build/outputs/apk/debug/
+          path: upload-apk/
